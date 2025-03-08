@@ -1,13 +1,10 @@
-import './App.css';
-import Ant from './components/Ant';
-// import Crud from './components/Crud';
+
+import RoutesConfig from "./Routes";
 
 function App() {
   return (
-    <div className="App">
-      {/* <Crud/> */}
-       <Ant/>
-    </div>
+ 
+    <RoutesConfig/>
   );
 }
 
