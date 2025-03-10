@@ -8,14 +8,17 @@ import {
   Col,
   Empty,
   message,
+  Popconfirm,
   Row,
   Space,
   Table,
+  Tag,
   Tooltip,
   Typography,
 } from 'antd';
 import {
   AppstoreOutlined,
+  DeleteOutlined,
   DownloadOutlined,
   PlusOutlined,
   TableOutlined,
@@ -25,6 +28,7 @@ const { Title, Text } = Typography;
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [tableView, setTableView] = useState(true);
+  const [loading, setLoading] = useState(true); // State to manage loading
   const [selectionType, setSelectionType] = useState('checkbox');
   const navigate = useNavigate();
   useEffect(() => {
@@ -36,13 +40,32 @@ const Customers = () => {
       .then((res) => {
         setCustomers(res.data);
         setTableView(res.data);
+        setLoading(false);
       })
-      .catch((err) => message.error(err.response.message));
+      .catch((err) => {
+        message.error(err.response.message);
+        setLoading(false);
+      });
   };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await jwtAxios.delete(`/emp/${id}`);
+      message.success(res.data.message);
+      getCustomers();
+    } catch (error) {
+      message.error(error.response?.data?.message);
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate('/customer-add', { state: { customer_id: id } });
+  };
+
   // Table Columns
   const columns = [
     {
-      title: 'Avatar',
+      title: 'Avatar'.toUpperCase(),
       dataIndex: 'name',
       key: 'avatar',
       render: (name) => (
@@ -52,20 +75,51 @@ const Customers = () => {
       ),
     },
     {
-      title: 'Name',
+      title: 'Name'.toUpperCase(),
       dataIndex: 'name',
       key: 'name',
       render: (text) => <Button type="link">{text}</Button>,
     },
     {
-      title: 'Email',
+      title: 'Email'.toUpperCase(),
       dataIndex: 'email',
       key: 'email',
     },
     {
-      title: 'Age',
+      title: 'Age'.toUpperCase(),
       dataIndex: 'age',
       key: 'age',
+    },
+    {
+      title: 'Role'.toUpperCase(),
+      dataIndex: 'roleId',
+      key: 'roleId',
+      render: (text) => (
+        <Tag color={text == 1 ? 'volcano' : 'geekblue'} type="link">
+          {text == 1 ? 'Admin' : 'User'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Actions'.toUpperCase(),
+      render: (record) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleEdit(record._id)}>
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete Customer"
+            description="Are you sure you want to delete this customer?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
   // rowSelection object indicates the need for row selection
@@ -118,6 +172,7 @@ const Customers = () => {
           }}
           dataSource={customers}
           columns={columns}
+          loading={loading} // Loading state
           rowKey="_id"
           bordered
           pagination={{ pageSize: 10 }}
@@ -129,8 +184,9 @@ const Customers = () => {
           {customers.map((customer) => (
             <Col key={customer._id} xs={24} sm={24} md={24} lg={8} xl={6}>
               <Badge.Ribbon
+                className="font-semibold"
                 text={customer.roleId === 1 ? 'Admin' : 'User'}
-                color={customer.roleId === 1 ? 'red' : 'cyan'}
+                color={customer.roleId === 1 ? 'magenta' : 'cyan'}
               >
                 <Card
                   hoverable
@@ -155,10 +211,24 @@ const Customers = () => {
                       </Text>
                     </div>
                   </div>
-
-                  <Text className="block mt-3 text-gray-700">
-                    Age: {customer.age}
-                  </Text>
+                  <div className="d-flex justify-between mt-3">
+                    <Text className="text-gray-700">Age: {customer.age}</Text>
+                    <Popconfirm
+                      title="Delete Customer"
+                      description="Are you sure you want to delete this customer?"
+                      onConfirm={() => handleDelete(customer._id)}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Button
+                        variant="text"
+                        shape="circle"
+                        color="danger"
+                        danger
+                        icon={<DeleteOutlined />}
+                      />
+                    </Popconfirm>
+                  </div>
                 </Card>
               </Badge.Ribbon>
             </Col>
