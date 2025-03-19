@@ -2,6 +2,8 @@ const Emp = require('../model/employee.model');
 const Role = require('../model/role.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const PDFDocument = require('pdfkit');
+
 
 const createEmployee = async (req, res) => {
   try {
@@ -135,16 +137,125 @@ const loginEmployee = async (req, res) => {
       'secretkey', // Change to env variable
       { expiresIn: '1h' },
     );
-     // Send only email, roleId, and name in the response
-     const employeeData = {
-        email: employee.email,
-        roleId: employee.roleId,
-        name: employee.name
-      };
+    // Send only email, roleId, and name in the response
+    const employeeData = {
+      email: employee.email,
+      roleId: employee.roleId,
+      name: employee.name,
+    };
 
-    res.status(200).json({ message: 'Login successful', token ,employee: employeeData});
+    res
+      .status(200)
+      .json({ message: 'Login successful', token, employee: employeeData });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+const previewPDF = async (req, res) => {
+  try {
+    const employees = await Emp.find(); // Fetch all employees
+
+    // Create PDF Document
+    const doc = new PDFDocument({ margin: 30 });
+
+    // Set Headers
+    res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader("Content-Disposition", "attachment; filename=employees.pdf");
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Add Title
+    doc.fontSize(20).text('Employee Report', { align: 'center' }).moveDown(1);
+
+    // Table Headers
+    const startX = 50;
+    let y = 120;
+    doc
+      .fillColor('black')
+      .fontSize(14)
+      .text('Name', startX, y)
+      .text('Email', startX + 150, y)
+      .text('Age', startX + 350, y)
+      .text('Role ID', startX + 400, y);
+
+    doc
+      .moveTo(50, y + 20)
+      .lineTo(550, y + 20)
+      .stroke(); // Line separator
+    y += 30;
+
+    // Add Employee Data
+    employees.forEach((emp) => {
+      doc
+        .fillColor('black')
+        .fontSize(12)
+        .text(emp.name, startX, y)
+        .text(emp.email, startX + 150, y)
+        .text(emp.age.toString(), startX + 350, y)
+        .text(emp.roleId.toString(), startX + 400, y);
+      y += 25;
+    });
+
+    // Finalize
+    doc.end();
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+const generatePDF = async (req, res) => {
+  try {
+    const employees = await Emp.find(); // Fetch all employees
+
+    // Create PDF Document
+    const doc = new PDFDocument({ margin: 30 });
+
+    // Set Headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=employees.pdf');
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Add Title
+    doc.fontSize(20).text('Employee Report', { align: 'center' }).moveDown(1);
+
+    // Table Headers
+    const startX = 50;
+    let y = 120;
+    doc
+      .fillColor('black')
+      .fontSize(14)
+      .text('Name', startX, y)
+      .text('Email', startX + 150, y)
+      .text('Age', startX + 350, y)
+      .text('Role ID', startX + 400, y);
+
+    doc
+      .moveTo(50, y + 20)
+      .lineTo(550, y + 20)
+      .stroke(); // Line separator
+    y += 30;
+
+    // Add Employee Data
+    employees.forEach((emp) => {
+      doc
+        .fillColor('black')
+        .fontSize(12)
+        .text(emp.name, startX, y)
+        .text(emp.email, startX + 150, y)
+        .text(emp.age.toString(), startX + 350, y)
+        .text(emp.roleId.toString(), startX + 400, y);
+      y += 25;
+    });
+
+    // Finalize
+    doc.end();
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -155,4 +266,6 @@ module.exports = {
   getEmployeeById,
   updateEmployee,
   deleteEmployee,
+  previewPDF,
+  generatePDF,
 };
