@@ -4,8 +4,8 @@ const router = express.Router();
 
 
 // 🛑 Static routes must be defined before dynamic routes
-router.get('/preview-emp', previewPDF);
-router.get('/download-emp', generatePDF);
+router.get('/preview-pdf', previewPDF);
+router.get('/download-pdf', generatePDF);
 
 router.get('/',getEmployees);
 

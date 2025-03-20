@@ -1,4 +1,3 @@
-
 import RoutesConfig from "./Routes";
 
 function App() {
@@ -9,3 +8,4 @@ function App() {
 }
 
 export default App;
+

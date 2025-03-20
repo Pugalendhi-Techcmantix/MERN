@@ -17,16 +17,26 @@ const { Title } = Typography;
 const CustomerAdd = () => {
   const [form] = Form.useForm(); // ✅ Use Ant Design form instance
   const [role, setRole] = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const customerId = location.state?.customer_id || null;
   useEffect(() => {
     roleData();
+    LocalData();
     if (customerId) {
       customerData();
     }
   }, [customerId]);
+
+  const LocalData = () => {
+    const storedUser = localStorage.getItem('userData');
+    if (storedUser) {
+      const data = JSON.parse(storedUser);
+      setData(data);
+    }
+  };
 
   const roleData = () => {
     jwtAxios
@@ -51,7 +61,6 @@ const CustomerAdd = () => {
       })
       .catch((err) => message.error(err.response?.data?.message));
   };
-
 
   // Handle form submission (Create or Update)
   const handleSubmit = async (values) => {
@@ -139,21 +148,26 @@ const CustomerAdd = () => {
             >
               <Input.Password />
             </Form.Item>
-            <Form.Item
-              label="Role"
-              name="rolename"
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-            >
-              <Select
-                className="w-full"
-                placeholder="Select Role"
-                options={role}
-              />
-            </Form.Item>
+            {data.roleId == 1 ? (
+              <Form.Item
+                label="Role"
+                name="rolename"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Select
+                  className="w-full"
+                  placeholder="Select Role"
+                  options={role}
+                />
+              </Form.Item>
+            ) : (
+              ''
+            )}
+
             <Form.Item>
               <Space>
                 <Button

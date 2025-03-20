@@ -118,7 +118,7 @@ const AppLayout = () => {
           >
             <Button  icon={<UserOutlined />}>
               <Space>
-                {userName}
+              {userName?.toUpperCase()}
                 <DownOutlined />
               </Space>
             </Button>

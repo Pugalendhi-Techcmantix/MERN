@@ -1,9 +1,21 @@
 const Emp = require('../model/employee.model');
 const Role = require('../model/role.model');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const PDFDocument = require('pdfkit');
+const CryptoJS = require('crypto-js');
+require('dotenv').config(); // Load environment variables
+const secretKey = process.env.SECRET_KEY; // Load SECRET_KEY from .env
 
+// Encrypt Password
+const encryptPassword = (password) => {
+  return CryptoJS.AES.encrypt(password, secretKey).toString();
+};
+
+// Decrypt Password
+const decryptPassword = (encryptedPassword) => {
+  const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
 
 const createEmployee = async (req, res) => {
   try {
@@ -22,21 +34,20 @@ const createEmployee = async (req, res) => {
         .status(400)
         .json({ message: "Invalid role name. Choose 'Admin' or 'User'." });
     }
-    // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 6);
+
+    // Encrypt password before saving
+    const encryptedPassword = encryptPassword(password);
     // Create employee with roleId
     const employee = new Emp({
       name,
       email,
-      password: hashedPassword,
+      password: encryptedPassword,
       age,
       roleId: role.roleId,
     });
 
     await employee.save();
-    res
-      .status(201)
-      .json({ message: 'Employee created successfully', employee });
+    res.status(201).json({ message: 'Employee created successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -67,7 +78,12 @@ const getEmployeeById = async (req, res) => {
     const role = await Role.findOne({ roleId: employee.roleId });
     const roleName = role ? role.name : 'Unknown';
 
-    res.status(200).json({ ...employee._doc, roleName });
+    // Decrypt the password before sending response
+    const decryptedPassword = decryptPassword(employee.password);
+
+    res
+      .status(200)
+      .json({ ...employee._doc, roleName, password: decryptedPassword });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -76,7 +92,7 @@ const getEmployeeById = async (req, res) => {
 const updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, age } = req.body;
+    const { name, email, password, age, roleName } = req.body;
 
     // Find the employee by ID
     const employee = await Emp.findById(id);
@@ -84,21 +100,43 @@ const updateEmployee = async (req, res) => {
       return res.status(404).json({ message: 'Employee not found' });
     }
 
-    // Update employee details
+    // Check if email is already in use (excluding the current employee)
+    if (email && email !== employee.email) {
+      const existingEmp = await Emp.findOne({ email });
+      if (existingEmp) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+      employee.email = email;
+    }
+
+    // Update roleId based on roleName
+    if (roleName) {
+      const role = await Role.findOne({ name: roleName });
+      if (!role) {
+        return res
+          .status(400)
+          .json({ message: "Invalid role name. Choose 'Admin' or 'User'." });
+      }
+      employee.roleId = role.roleId;
+    }
+
+    // Update other fields
     employee.name = name || employee.name;
-    employee.email = email || employee.email;
     employee.age = age || employee.age;
+
+    // Encrypt new password before updating (if provided)
+    if (password) {
+      const secretKey = process.env.SECRET_KEY;
+      employee.password = CryptoJS.AES.encrypt(password, secretKey).toString();
+    }
 
     await employee.save();
 
-    res
-      .status(200)
-      .json({ message: 'Employee updated successfully', employee });
+    res.status(200).json({ message: 'Employee updated successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
@@ -125,9 +163,9 @@ const loginEmployee = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Compare passwords
-    const isMatch = await bcrypt.compare(password, employee.password);
-    if (!isMatch) {
+    // Decrypt stored password and compare
+    const decryptedPassword = decryptPassword(employee.password);
+    if (decryptedPassword !== password) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
@@ -137,6 +175,7 @@ const loginEmployee = async (req, res) => {
       'secretkey', // Change to env variable
       { expiresIn: '1h' },
     );
+
     // Send only email, roleId, and name in the response
     const employeeData = {
       email: employee.email,
@@ -154,6 +193,12 @@ const loginEmployee = async (req, res) => {
 
 const previewPDF = async (req, res) => {
   try {
+    // Fetch all roles and store in a map (roleId -> roleName)
+    const roles = await Role.find(); // Fetch all roles once
+    const roleMap = {};
+    roles.forEach((role) => {
+      roleMap[role.roleId] = role.name; // Store roleId -> roleName
+    });
     const employees = await Emp.find(); // Fetch all employees
 
     // Create PDF Document
@@ -161,7 +206,7 @@ const previewPDF = async (req, res) => {
 
     // Set Headers
     res.setHeader('Content-Type', 'application/pdf');
-    // res.setHeader("Content-Disposition", "attachment; filename=employees.pdf");
+    // res.setHeader('Content-Disposition', 'attachment; filename=employees.pdf');
 
     // Pipe PDF to response
     doc.pipe(res);
@@ -178,7 +223,7 @@ const previewPDF = async (req, res) => {
       .text('Name', startX, y)
       .text('Email', startX + 150, y)
       .text('Age', startX + 350, y)
-      .text('Role ID', startX + 400, y);
+      .text('Role', startX + 400, y);
 
     doc
       .moveTo(50, y + 20)
@@ -188,13 +233,14 @@ const previewPDF = async (req, res) => {
 
     // Add Employee Data
     employees.forEach((emp) => {
+      const roleName = roleMap[emp.roleId] || 'Unknown'; // Get role name from map
       doc
         .fillColor('black')
         .fontSize(12)
         .text(emp.name, startX, y)
         .text(emp.email, startX + 150, y)
         .text(emp.age.toString(), startX + 350, y)
-        .text(emp.roleId.toString(), startX + 400, y);
+        .text(roleName, startX + 400, y);
       y += 25;
     });
 
@@ -205,8 +251,19 @@ const previewPDF = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+
+
+
+
 const generatePDF = async (req, res) => {
   try {
+    // Fetch all roles and store in a map (roleId -> roleName)
+    const roles = await Role.find(); // Fetch all roles once
+    const roleMap = {};
+    roles.forEach((role) => {
+      roleMap[role.roleId] = role.name; // Store roleId -> roleName
+    });
     const employees = await Emp.find(); // Fetch all employees
 
     // Create PDF Document
@@ -231,7 +288,7 @@ const generatePDF = async (req, res) => {
       .text('Name', startX, y)
       .text('Email', startX + 150, y)
       .text('Age', startX + 350, y)
-      .text('Role ID', startX + 400, y);
+      .text('Role', startX + 400, y);
 
     doc
       .moveTo(50, y + 20)
@@ -241,13 +298,14 @@ const generatePDF = async (req, res) => {
 
     // Add Employee Data
     employees.forEach((emp) => {
+      const roleName = roleMap[emp.roleId] || 'Unknown'; // Get role name from map
       doc
         .fillColor('black')
         .fontSize(12)
         .text(emp.name, startX, y)
         .text(emp.email, startX + 150, y)
         .text(emp.age.toString(), startX + 350, y)
-        .text(emp.roleId.toString(), startX + 400, y);
+        .text(roleName, startX + 400, y);
       y += 25;
     });
 

@@ -30,10 +30,20 @@ const Customers = () => {
   const [tableView, setTableView] = useState(true);
   const [loading, setLoading] = useState(true); // State to manage loading
   const [selectionType, setSelectionType] = useState('checkbox');
+  const [data, setData] = useState([]); // State to store local data
   const navigate = useNavigate();
   useEffect(() => {
     getCustomers();
+    LocalData();
   }, []);
+
+  const LocalData = () => {
+    const storedUser = localStorage.getItem('userData');
+    if (storedUser) {
+      const data = JSON.parse(storedUser);
+      setData(data);
+    }
+  };
   const getCustomers = () => {
     jwtAxios
       .get(`emp`)
@@ -61,6 +71,25 @@ const Customers = () => {
   const handleEdit = (id) => {
     navigate('/customer-add', { state: { customer_id: id } });
   };
+
+  const handleExport = () => {
+    jwtAxios
+      .get(`/emp/download-pdf`, { responseType: 'blob' })
+      .then((res) => {
+        const blob = new Blob([res.data], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'employees.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        message.success('PDF downloaded successfully');
+      })
+      .catch((err) => {
+        message.error(err.response?.data?.message || 'Failed to download PDF');
+      });
+  };
+  
 
   // Table Columns
   const columns = [
@@ -100,27 +129,31 @@ const Customers = () => {
         </Tag>
       ),
     },
-    {
-      title: 'Actions'.toUpperCase(),
-      render: (record) => (
-        <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record._id)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Delete Customer"
-            description="Are you sure you want to delete this customer?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+    ...(data.roleId === 1
+      ? [
+          {
+            title: 'Actions'.toUpperCase(),
+            render: (record) => (
+              <Space size="middle">
+                <Button type="link" onClick={() => handleEdit(record._id)}>
+                  Edit
+                </Button>
+                <Popconfirm
+                  title="Delete Customer"
+                  description="Are you sure you want to delete this customer?"
+                  onConfirm={() => handleDelete(record._id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button type="link" danger>
+                    Delete
+                  </Button>
+                </Popconfirm>
+              </Space>
+            ),
+          },
+        ]
+      : []),
   ];
   // rowSelection object indicates the need for row selection
   const rowSelection = {
@@ -142,17 +175,26 @@ const Customers = () => {
       <div className="flex justify-between items-center mb-4">
         <Title level={3}>Customers</Title>
         <Space>
-          <Button type="primary" icon={<DownloadOutlined />} iconPosition="end">
-            Export
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            iconPosition="end"
-            onClick={() => navigate('/customer-add')}
-          >
-            Add
-          </Button>
+          {data.roleId === 1 && (
+            <>
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                iconPosition="end"
+                onClick={handleExport}
+              >
+                Export
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                iconPosition="end"
+                onClick={() => navigate('/customer-add')}
+              >
+                Add
+              </Button>
+            </>
+          )}
           <Tooltip title={tableView ? 'Card View' : 'Table View'}>
             <Button
               type="primary"
@@ -213,21 +255,25 @@ const Customers = () => {
                   </div>
                   <div className="d-flex justify-between mt-3">
                     <Text className="text-gray-700">Age: {customer.age}</Text>
-                    <Popconfirm
-                      title="Delete Customer"
-                      description="Are you sure you want to delete this customer?"
-                      onConfirm={() => handleDelete(customer._id)}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <Button
-                        variant="text"
-                        shape="circle"
-                        color="danger"
-                        danger
-                        icon={<DeleteOutlined />}
-                      />
-                    </Popconfirm>
+                    {data.roleId == 1 ? (
+                      <Popconfirm
+                        title="Delete Customer"
+                        description="Are you sure you want to delete this customer?"
+                        onConfirm={() => handleDelete(customer._id)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <Button
+                          variant="text"
+                          shape="circle"
+                          color="danger"
+                          danger
+                          icon={<DeleteOutlined />}
+                        />
+                      </Popconfirm>
+                    ) : (
+                      ''
+                    )}
                   </div>
                 </Card>
               </Badge.Ribbon>
