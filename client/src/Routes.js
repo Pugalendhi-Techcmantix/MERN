@@ -14,6 +14,7 @@ const Login = lazy(() => import('./Log/Login'));
 const Dashboard = lazy(() => import('./components/pages/Dashboard'));
 const Customers = lazy(() => import('./components/pages/Customer/Customers'));
 const CustomerAdd =lazy(()=>import('./components/pages/Customer/CustomerAdd'));
+const Orders =lazy(()=>import('./components/pages/Orders/Orders')) ;
 
 const Sample = lazy(() => import('./components/pages/Sample'));
 
@@ -49,6 +50,7 @@ const RoutesConfig = () => {
             <Route index element={<Dashboard />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/customer-add" element={<CustomerAdd />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/sample" element={<Sample />} />
           </Route>
 

@@ -9,7 +9,7 @@ dotenv.config(); // Load environment variables
 const crudRoute = require('./router/crud.router.js');
 const roleRoute = require('./router/role.router.js');
 const empRoute = require('./router/emp.router.js');
-const productsRoute = require('./router/product.router.js');
+const ordersRoute = require('./router/orders.router.js');
 
 const app = express();
 app.use(express.json());
@@ -25,7 +25,7 @@ app.use(
 app.use('/crud', crudRoute);
 app.use('/role', roleRoute);
 app.use('/emp', empRoute);
-app.use('/products', productsRoute);
+app.use('/orders', ordersRoute);
 
 // // Database Connection
 // mongoose

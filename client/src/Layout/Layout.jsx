@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  CodeSandboxOutlined,
   DownOutlined,
   HomeOutlined,
   LogoutOutlined,
@@ -88,6 +89,11 @@ const AppLayout = () => {
               key: '/customers',
               icon: <UserSwitchOutlined />,
               label: 'Customers',
+            },
+            {
+              key: '/orders',
+              icon: <CodeSandboxOutlined />,
+              label: 'Orders',
             },
             {
               key: '/sample',
