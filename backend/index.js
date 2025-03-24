@@ -14,11 +14,20 @@ const ordersRoute = require('./router/orders.router.js');
 const app = express();
 app.use(express.json());
 
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL || "*",
+//     method: ['GET', 'POST', 'PUT', 'DELETE'],
+//   }),
+// );
+// ✅ Corrected CORS Configuration (Allow XHR & Credentials)
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
-    method: ['GET', 'POST', 'PUT', 'DELETE'],
-  }),
+    origin: process.env.FRONTEND_URL || "*", // Allow frontend URL
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true, // Enable cookies/auth headers
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow required headers
+  })
 );
 
 // Routes

@@ -11,6 +11,7 @@ const jwtAxios = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // ✅ Enable credentials in request
 });
 
 // Request Interceptor - Attach token automatically
