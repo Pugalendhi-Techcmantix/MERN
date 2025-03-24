@@ -60,3 +60,6 @@ mongoose
   .catch((error) => {
     console.error('❌ Database connection failed:', error);
   });
+
+  // Export the Express app (VERY IMPORTANT for Vercel)
+module.exports = app;
