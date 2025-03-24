@@ -35,6 +35,13 @@ app.use(
 app.use('/role', roleRoute);
 app.use('/emp', empRoute);
 app.use('/orders', ordersRoute);
+app.get("/test", async (req, res) => {
+  try {
+      res.send("API is working!");
+  } catch (error) {
+      res.status(500).send("Error occurred");
+  }
+});
 
 // // Database Connection
 // mongoose
