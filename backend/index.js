@@ -11,16 +11,16 @@ const ordersRoute = require('./router/orders.router.js');
 
 dotenv.config(); // Load environment variables
 const app = express();
-const server = http.createServer(app); // ✅ Create an HTTP server
-// ✅ Initialize Socket.IO with the server
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || "*", // React frontend URL
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-  transports: ["websocket", "polling"],
-});
+// const server = http.createServer(app); // ✅ Create an HTTP server
+// // ✅ Initialize Socket.IO with the server
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.FRONTEND_URL || "*", // React frontend URL
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+//   transports: ["websocket", "polling"],
+// });
 
 app.use(express.json());
 
@@ -47,18 +47,18 @@ app.get("/test", async (req, res) => {
 });
 
 // ✅ Socket.IO Connection
-io.on("connection", (socket) => {
-  console.log("⚡ New client connected:", socket.id);
+// io.on("connection", (socket) => {
+//   console.log("⚡ New client connected:", socket.id);
 
-  socket.on("message", (data) => {
-    // console.log("📩 Message received:", data);
-    io.emit("message", data); // Broadcast to all clients
-  });
+//   socket.on("message", (data) => {
+//     // console.log("📩 Message received:", data);
+//     io.emit("message", data); // Broadcast to all clients
+//   });
 
-  socket.on("disconnect", () => {
-    console.log("❌ Client disconnected:", socket.id);
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log("❌ Client disconnected:", socket.id);
+//   });
+// });
 
 // Database Connection
 mongoose

@@ -150,7 +150,7 @@ const AppLayout = () => {
         {/* Chat Box (Visible when clicked) */}
         {chatVisible && (
           <div className="fixed bottom-20 right-8 z-50">
-            <Chat />
+            {/* <Chat /> */}
           </div>
         )}
       </Layout>
