@@ -2,29 +2,22 @@ import React, { useEffect, useState } from 'react';
 import jwtAxios from '../../../utils/jwtAxios';
 import {
   Avatar,
-  Badge,
   Button,
-  Card,
-  Col,
   Empty,
   message,
   Popconfirm,
-  Row,
   Space,
   Table,
-  Tag,
   Tooltip,
   Typography,
 } from 'antd';
 import {
   AppstoreOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
   PlusOutlined,
   TableOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const Orders = () => {
   const [customers, setCustomers] = useState([]);
   const [tableView, setTableView] = useState(true);

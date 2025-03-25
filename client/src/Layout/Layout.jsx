@@ -13,6 +13,7 @@ import {
 import {
   Button,
   Dropdown,
+  FloatButton,
   Layout,
   Menu,
   message,
@@ -20,6 +21,7 @@ import {
   Typography,
 } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import Chat from '../components/pages/Chat';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -30,6 +32,8 @@ const AppLayout = () => {
   const location = useLocation();
   const [selectedKey, setSelectedKey] = useState(location.pathname);
   const [userName, setUserName] = useState('');
+  const [chatVisible, setChatVisible] = useState(false); // Toggle chat visibility
+
   // Fetch user name from localStorage on mount
   useEffect(() => {
     setSelectedKey(location.pathname);
@@ -49,13 +53,13 @@ const AppLayout = () => {
     {
       label: 'Profile',
       key: '0',
-      icon:<UserOutlined />
+      icon: <UserOutlined />,
     },
     {
       label: 'Logout',
       key: '1',
-      icon:<LogoutOutlined  />,
-      onClick: () => handleLogout()
+      icon: <LogoutOutlined />,
+      onClick: () => handleLogout(),
     },
   ];
 
@@ -122,9 +126,9 @@ const AppLayout = () => {
             }}
             trigger={['click']}
           >
-            <Button  icon={<UserOutlined />}>
+            <Button icon={<UserOutlined />}>
               <Space>
-              {userName?.toUpperCase()}
+                {userName?.toUpperCase()}
                 <DownOutlined />
               </Space>
             </Button>
@@ -134,6 +138,21 @@ const AppLayout = () => {
         <Content className="m-6 p-6">
           <Outlet />
         </Content>
+
+        {/* FloatButton for Chat */}
+        <FloatButton
+          icon={<UserOutlined />}
+          type="primary"
+          style={{ right: 30, bottom: 30 }}
+          onClick={() => setChatVisible(!chatVisible)} // Toggle chat visibility
+        />
+
+        {/* Chat Box (Visible when clicked) */}
+        {chatVisible && (
+          <div className="fixed bottom-20 right-8 z-50">
+            <Chat />
+          </div>
+        )}
       </Layout>
     </Layout>
   );
