@@ -65,7 +65,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ Database connected');
-    server.listen(4000, () => {
+    app.listen(4000, () => {
       console.log('🚀 Server running at http://localhost:4000');
     });
   })

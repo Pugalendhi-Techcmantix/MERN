@@ -89,7 +89,6 @@ const Customers = () => {
         message.error(err.response?.data?.message || 'Failed to download PDF');
       });
   };
-  
 
   // Table Columns
   const columns = [
@@ -219,6 +218,7 @@ const Customers = () => {
           bordered
           pagination={{ pageSize: 10 }}
           locale={{ emptyText: <Empty description="No Customers Found" /> }}
+          scroll={{ x: 'max-content' }}
         />
       ) : // Card View
       customers?.length > 0 ? (

@@ -166,6 +166,7 @@ const Orders = () => {
           bordered
           pagination={{ pageSize: 10 }}
           locale={{ emptyText: <Empty description="No Customers Found" /> }}
+          scroll={{ x: 'max-content' }}
         />
       ) : (
         <Empty description="No Orders Found" className="mt-6" />
