@@ -224,7 +224,7 @@ const Customers = () => {
       customers?.length > 0 ? (
         <Row gutter={[24, 24]}>
           {customers.map((customer) => (
-            <Col key={customer._id} xs={24} sm={24} md={24} lg={8} xl={6}>
+            <Col key={customer._id} xs={24} sm={24} md={24} lg={12} xl={8} xxl={6}>
               <Badge.Ribbon
                 className="font-semibold"
                 text={customer.roleId === 1 ? 'Admin' : 'User'}

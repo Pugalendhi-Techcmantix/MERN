@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   message,
-  Select,
   Space,
   Spin,
   Typography,
@@ -15,21 +14,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import add_customer from '../../../assets/add_customer.svg';
 const { Title } = Typography;
 
-const CustomerAdd = () => {
+const ProductAdd = () => {
   const [form] = Form.useForm(); // ✅ Use Ant Design form instance
-  const [role, setRole] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const customerId = location.state?.customer_id || null;
+  const productId = location.state?.product_id || null;
   useEffect(() => {
-    roleData();
     LocalData();
-    if (customerId) {
+    if (productId) {
       customerData();
     }
-  }, [customerId]);
+  }, [productId]);
 
   const LocalData = () => {
     const storedUser = localStorage.getItem('userData');
@@ -39,26 +36,12 @@ const CustomerAdd = () => {
     }
   };
 
-  const roleData = () => {
-    jwtAxios
-      .get(`role`)
-      .then((res) => {
-        setRole(
-          res.data.map((r) => ({
-            value: r.name,
-            label: r.name,
-          })),
-        );
-      })
-      .catch((err) => message.error(err.message));
-  };
-
   const customerData = () => {
     jwtAxios
-      .get(`/emp/${customerId}`)
+      .get(`/products/${productId}`)
       .then((res) => {
         console.log(res.data);
-        form.setFieldsValue({ ...res.data, rolename: res.data.roleName });
+        form.setFieldsValue({ ...res.data });
       })
       .catch((err) => message.error(err.response?.data?.message));
   };
@@ -67,26 +50,29 @@ const CustomerAdd = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const newCustomer = {
-        name: values.name,
-        email: values.email,
-        password: values.password,
-        age: values.age,
-        roleName: values.rolename,
+      const newProduct = {
+        productName: values.productName,
+        price: values.price,
+        category: values.category,
+        color: values.color,
+        description: values.description,
       };
 
-      if (customerId) {
-        // UPDATE customer if customerId exists
-        const res = await jwtAxios.put(`/emp/${customerId}`, newCustomer);
+      if (!productId) {
+        // Only add createdBy when creating a new product
+        newProduct.createdBy = data.id;
+      }
+
+      if (productId) {
+        // UPDATE customer if productId exists
+        const res = await jwtAxios.put(`/products/${productId}`, newProduct);
         message.success(res.data.message);
       } else {
         // CREATE new customer
-        const res = await jwtAxios.post(`emp`, newCustomer);
+        const res = await jwtAxios.post(`products`, newProduct);
         message.success(res.data.message);
         form.resetFields(); // Reset form after submission
       }
-
-      // navigate('/customers'); // Redirect after success
     } catch (error) {
       message.error(error.response?.data?.message);
     } finally {
@@ -96,28 +82,28 @@ const CustomerAdd = () => {
   return (
     <div className="grid lg:grid-cols-2">
       <Card>
-        <Title level={3}>{customerId ? 'Edit Customer' : 'Add Customer'}</Title>
-        <Spin spinning={loading} tip={customerId ? 'Updating' : 'Submitting'}>
+        <Title level={3}>{productId ? 'Edit Product' : 'Add Product'}</Title>
+        <Spin spinning={loading} tip={productId ? 'Updating' : 'Submitting'}>
           <Form layout="vertical" form={form} onFinish={handleSubmit}>
             <Form.Item
-              label="Name"
-              name="name"
+              label="Product Name"
+              name="productName"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your name!',
+                  message: 'Enter product name!',
                 },
               ]}
             >
               <Input />
             </Form.Item>
             <Form.Item
-              label="Age"
-              name="age"
+              label="price"
+              name="price"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your age!',
+                  message: 'Enter product price!',
                 },
               ]}
             >
@@ -125,60 +111,53 @@ const CustomerAdd = () => {
             </Form.Item>
 
             <Form.Item
-              label="Email"
-              name="email"
+              label="Color"
+              name="color"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your email!',
+                  message: 'Enter product color!',
                 },
               ]}
             >
-              <Input type="email" />
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Category"
+              name="category"
+              rules={[
+                {
+                  required: true,
+                  message: 'Enter product category!',
+                },
+              ]}
+            >
+              <Input />
             </Form.Item>
 
             <Form.Item
-              label="Password"
-              name="password"
+              label="Description"
+              name="description"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your password!',
+                  message: 'Enter product description!',
                 },
               ]}
             >
-              <Input.Password />
+              <Input.TextArea />
             </Form.Item>
-            {data.roleId == 1 ? (
-              <Form.Item
-                label="Role"
-                name="rolename"
-                rules={[
-                  {
-                    required: true,
-                  },
-                ]}
-              >
-                <Select
-                  className="w-full"
-                  placeholder="Select Role"
-                  options={role}
-                />
-              </Form.Item>
-            ) : (
-              ''
-            )}
 
             <Form.Item>
               <Space>
                 <Button
                   variant="outlined"
-                  onClick={() => navigate('/customers')}
+                  onClick={() => navigate('/products')}
                 >
                   Cancle
                 </Button>
                 <Button type="primary" htmlType="submit">
-                  {customerId ? 'Update' : 'Save'}
+                  {productId ? 'Update' : 'Save'}
                 </Button>
               </Space>
             </Form.Item>
@@ -196,4 +175,4 @@ const CustomerAdd = () => {
   );
 };
 
-export default CustomerAdd;
+export default ProductAdd;

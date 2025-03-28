@@ -178,6 +178,7 @@ const loginEmployee = async (req, res) => {
 
     // Send only email, roleId, and name in the response
     const employeeData = {
+      id: employee._id,
       email: employee.email,
       roleId: employee.roleId,
       name: employee.name,

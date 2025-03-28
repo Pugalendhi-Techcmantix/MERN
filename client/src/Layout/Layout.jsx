@@ -100,9 +100,9 @@ const AppLayout = () => {
               label: 'Orders',
             },
             {
-              key: '/sample',
-              icon: <VideoCameraOutlined />,
-              label: 'Sample',
+              key: '/products',
+              icon: <CodeSandboxOutlined />,
+              label: 'Products',
             },
           ]}
         />

@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 const roleRoute = require('./router/role.router.js');
 const empRoute = require('./router/emp.router.js');
 const ordersRoute = require('./router/orders.router.js');
+const productsRoutes = require('./router/products.router.js');
 
 dotenv.config(); // Load environment variables
 const app = express();
@@ -38,6 +39,7 @@ app.use(
 app.use('/role', roleRoute);
 app.use('/emp', empRoute);
 app.use('/orders', ordersRoute);
+app.use('/products', productsRoutes);
 app.get("/test", async (req, res) => {
   try {
       res.send("API is working!");
