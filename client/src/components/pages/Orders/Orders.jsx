@@ -3,6 +3,7 @@ import jwtAxios from '../../../utils/jwtAxios';
 import {
   Avatar,
   Button,
+  Card,
   Empty,
   message,
   Popconfirm,
@@ -130,7 +131,7 @@ const Orders = () => {
   ];
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
+    <Card className="shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <Title level={3}>Orders</Title>
         <Space>
@@ -164,14 +165,19 @@ const Orders = () => {
           loading={loading} // Loading state
           rowKey="_id"
           bordered
-          pagination={{ pageSize: 10 }}
-          locale={{ emptyText: <Empty description="No Customers Found" /> }}
-          scroll={{ x: 'max-content' }}
+          pagination={{
+            pageSizeOptions: ['5', '10', '20', '50'], // Page size options
+            showSizeChanger: true, // Allow users to change page size
+            defaultPageSize: 10, // Default rows per page
+          }}
+          locale={{ emptyText: <Empty description="No Orders Found" /> }}
+          scroll={{ x: 'max-content', y: 500 }}
+          size="small"
         />
       ) : (
         <Empty description="No Orders Found" className="mt-6" />
       )}
-    </div>
+    </Card>
   );
 };
 

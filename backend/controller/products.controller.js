@@ -4,8 +4,10 @@ const Employee = require('../model/employee.model'); // Ensure you have an Emplo
 // Create a new product
 const createProduct = async (req, res) => {
   try {
-    const { productName, category, price, description, color, createdBy } = req.body;
-
+    const { productName, category, price, description, color, createdBy,images  } = req.body;
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({ message: 'At least one image (Base64) is required' });
+    }
     // Check if employee exists
     const employee = await Employee.findById(createdBy);
     if (!employee) {
@@ -18,6 +20,7 @@ const createProduct = async (req, res) => {
       price,
       description,
       color,
+      images,
       createdBy: createdBy,
     });
 
@@ -57,12 +60,16 @@ const getProductById = async (req, res) => {
 // Update product
 const updateProduct = async (req, res) => {
   try {
-    const { productName, category, price, description, color } = req.body;
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { productName, category, price, description, color },
-      { new: true }
-    );
+    const { productName, category, price, description, color,images  } = req.body;
+    const updateFields = { productName, category, price, description, color };
+    if (images) updateFields.images = images; // Update Base64 images if provided
+    
+    const product = await Product.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+    // const product = await Product.findByIdAndUpdate(
+    //   req.params.id,
+    //   { productName, category, price, description, color },
+    //   { new: true }
+    // );
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }

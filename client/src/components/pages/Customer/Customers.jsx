@@ -29,7 +29,6 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [tableView, setTableView] = useState(true);
   const [loading, setLoading] = useState(true); // State to manage loading
-  const [selectionType, setSelectionType] = useState('checkbox');
   const [data, setData] = useState([]); // State to store local data
   const navigate = useNavigate();
   useEffect(() => {
@@ -154,23 +153,10 @@ const Customers = () => {
         ]
       : []),
   ];
-  // rowSelection object indicates the need for row selection
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
-        selectedRows,
-      );
-    },
-    getCheckboxProps: (record) => ({
-      disabled: record.name === 'Disabled User',
-      // Column configuration not to be checked
-      name: record.name,
-    }),
-  };
+
+
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
+    <Card className="shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <Title level={3}>Customers</Title>
         <Space>
@@ -207,24 +193,33 @@ const Customers = () => {
       {/* Table View */}
       {tableView ? (
         <Table
-          rowSelection={{
-            type: selectionType,
-            ...rowSelection,
-          }}
+         
           dataSource={customers}
           columns={columns}
           loading={loading} // Loading state
           rowKey="_id"
           bordered
-          pagination={{ pageSize: 10 }}
+          pagination={{
+            pageSizeOptions: ['5', '10', '20', '50'], // Page size options
+            showSizeChanger: true, // Allow users to change page size
+            defaultPageSize: 10, // Default rows per page
+          }}
           locale={{ emptyText: <Empty description="No Customers Found" /> }}
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: 'max-content', y: 500 }}
         />
       ) : // Card View
       customers?.length > 0 ? (
         <Row gutter={[24, 24]}>
           {customers.map((customer) => (
-            <Col key={customer._id} xs={24} sm={24} md={24} lg={12} xl={8} xxl={6}>
+            <Col
+              key={customer._id}
+              xs={24}
+              sm={24}
+              md={24}
+              lg={12}
+              xl={8}
+              xxl={6}
+            >
               <Badge.Ribbon
                 className="font-semibold"
                 text={customer.roleId === 1 ? 'Admin' : 'User'}
@@ -283,7 +278,7 @@ const Customers = () => {
       ) : (
         <Empty description="No Customers Found" className="mt-6" />
       )}
-    </div>
+    </Card>
   );
 };
 

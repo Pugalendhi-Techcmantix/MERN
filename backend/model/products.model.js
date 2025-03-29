@@ -23,6 +23,12 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    images: [
+      {
+        type: String, // Base64 encoded string
+        required: true,
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee', // Reference to Employee model
