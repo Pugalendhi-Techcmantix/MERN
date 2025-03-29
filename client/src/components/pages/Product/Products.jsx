@@ -104,6 +104,8 @@ const Products = () => {
       title: 'Price'.toUpperCase(),
       dataIndex: 'price',
       key: 'price',
+      render: (price) => `₹${price}`,
+
     },
     {
       title: 'Color'.toUpperCase(),

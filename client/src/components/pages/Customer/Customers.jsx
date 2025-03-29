@@ -206,6 +206,7 @@ const Customers = () => {
           }}
           locale={{ emptyText: <Empty description="No Customers Found" /> }}
           scroll={{ x: 'max-content', y: 500 }}
+          size="small"
         />
       ) : // Card View
       customers?.length > 0 ? (
