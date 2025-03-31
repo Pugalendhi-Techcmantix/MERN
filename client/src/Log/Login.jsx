@@ -72,7 +72,7 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center ">
         {isSignIn ? (
           <Card className="max-w-md w-full rounded-lg shadow-sm">
             <Title level={2} className="text-center text-gray-800 mb-6">
