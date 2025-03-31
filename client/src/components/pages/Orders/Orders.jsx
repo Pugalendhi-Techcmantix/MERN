@@ -130,11 +130,27 @@ const Orders = () => {
     },
 
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (status) => {
-        let color = status === 'pending' ? 'gold' : 'green';
+        let color = "default";
+        switch (status) {
+          case "pending":
+            color = "gold";
+            break;
+          case "shipped":
+            color = "blue";
+            break;
+          case "delivered":
+            color = "green";
+            break;
+          case "canceled":
+            color = "red";
+            break;
+          default:
+            color = "default";
+        }
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
     },
