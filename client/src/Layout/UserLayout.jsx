@@ -105,7 +105,8 @@ const UserLayout = () => {
 
       {/* Mobile Drawer Menu */}
       <Drawer
-        title="Navigation"
+        width={250}
+        title="Menus"
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
