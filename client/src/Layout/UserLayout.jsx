@@ -10,7 +10,7 @@ import {
   message,
 } from 'antd';
 import { MenuOutlined, UserOutlined } from '@ant-design/icons';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const { Header, Content, Footer } = Layout;
 const { Text } = Typography;
@@ -62,22 +62,21 @@ const UserLayout = () => {
         </Text>
 
         {/* Desktop Menu */}
-        <div>
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            onClick={({ key }) => {
-              setSelectedKey(key);
-              navigate(key);
-            }}
-            className="flex-1 justify-center hidden md:flex bg-[#283276] "
-            items={items.map((item) => ({
-              ...item,
-              className: `transition  ${
-                selectedKey !== item.key ? 'text-white' : ' '
-              } `,
-            }))}
-          />
+        <div className="flex space-x-4 rounded-lg ">
+          {items.map((item) => {
+            const isActive = location.pathname === item.key;
+            return (
+              <Link
+                key={item.key}
+                to={item.key}
+                className={`px-4 hidden md:flex rounded-md font-semibold transition text-decoration-none ${
+                  isActive ? 'bg-red-400 text-white' : 'text-white'
+                } hover:bg-teal-500`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
         {/* Right Section: User Profile & Mobile Menu */}
         <div className="flex items-center gap-4">
